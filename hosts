@@ -1,0 +1,18 @@
+[masters]
+master ansible_host=10.0.0.1 ansible_user=vagrant
+
+
+[workers]
+worker1 ansible_host=10.0.0.2 ansible_user=vagrant
+worker2 ansible_host=10.0.0.3  ansible_user=vagrant
+
+[players]
+player ansible_host=10.0.0.4  ansible_user=vagrant
+
+[ubuntu_hosts]
+worker1
+worker3
+
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

@@ -1,0 +1,18 @@
+- hosts: all
+  tasks:
+    - name: create 'ubuntu' user
+      user: name=ubuntu append=yes state=present createhome=yes shell=/bin/bash
+
+    - name: allow 'ubuntu' to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: set up authorized keys for the ubuntu user
+      authorized_key: user=ubuntu key="{{item}}"
+      with_file:
+        - ~/.ssh/id_rsa.pub
+
+
+#authenticity errors : ssh-keyscan -t rsa 10.29.220.101 | ssh-keygen -lv -f -
