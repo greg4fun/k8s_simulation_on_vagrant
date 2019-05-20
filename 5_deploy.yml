@@ -1,0 +1,21 @@
+- hosts: master
+  become: no
+  tasks:
+    # TODO -rewrite to k8s ansible openshift
+    - name: wait for pods to come up
+      shell: kubectl get pods -o json
+      register: kubectl_get_pods
+      until: 
+        kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+    - name: load db deployment
+      #TODO copy deployment files first
+      shell: kubectl apply -f /home/greg/sensyne/db-sensyne-deployment.yaml
+
+    - name: load db service
+      shell: kubectl apply -f /home/greg/sensyne/db-sensyne-service.yaml
+
+    - name: load web deployment
+      shell: kubectl apply -f  /home/greg/sensyne/web-sensyne-deployment.yaml
+
+    - name: load web service
+      shell: kubectl apply -f /home/greg/sensyne/web-sensyne-service.yaml
