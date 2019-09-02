@@ -41,3 +41,12 @@
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
+
+
+
+        #- name: kubernetes.yml --> Install Flannel
+        #shell: kubectl -n kube-system apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+        #become: yes
+        #environment:
+        #KUBECONFIG: "/etc/kubernetes/admin.conf"
+        #when: inventory_hostname in (groups['masters'] | last)

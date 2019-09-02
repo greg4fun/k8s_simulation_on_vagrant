@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
           'modifyvm', :id,
           '--natdnshostresolver1', 'on',
           '--memory', '1024',
-          '--cpus', '2'
+          '--cpus', '1'
         ]
     end
 
@@ -53,7 +53,7 @@ Vagrant.configure("2") do |config|
           'modifyvm', :id,
           '--natdnshostresolver1', 'on',
           '--memory', '1024',
-          '--cpus', '2'
+          '--cpus', '1'
         ]
     end
 

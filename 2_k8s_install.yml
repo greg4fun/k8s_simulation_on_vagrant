@@ -37,7 +37,7 @@
         state: present
         update_cache: true
 
-- hosts: master
+- hosts: k8s_hosts
   become: yes
   tasks:
     - name: install kubeadm
