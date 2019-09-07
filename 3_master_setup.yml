@@ -1,52 +1,46 @@
 - hosts: master
   become: yes
   tasks:
-    - name: initialize the cluster
-      become: yes
-      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
-      args:
-        chdir: $HOME
-        creates: cluster_initialized.txt
-      #register: initialize
+  - name: Add vagrant user to docker group
+    user:
+      name: vagrant
+      group: docker
 
-      #- debug: msg="{{ initialize.stdout }}"
-    - name: Wait init to complete and generate admin.conf
-      wait_for:
-        path: /etc/kubernetes/admin.conf
+  - name: Remove swapfile from /etc/fstab
+    mount:
+      name: "{{ item }}"
+      fstype: swap
+      state: absent
+    with_items:
+      - swap
+      - none
+
+  - name: Disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+
+  - name: Restart kubelet
+    service:
+      name: kubelet
+      daemon_reload: yes
+      state: restarted
+
+  - name: Initialize the Kubernetes cluster using kubeadm
+    command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10"  --node-name k8s-master --pod-network-cidr=192.168.0.0/16
+
+  - name: Setup kubeconfig for vagrant user
+    command: "{{ item }}"
+    with_items:
+     - mkdir -p /home/vagrant/.kube
+     - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+     - chown vagrant:vagrant /home/vagrant/.kube/config
+
+  - name: Install calico pod network
+    become: false
+    command: kubectl create -f https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+
+  - name: Generate join command
+    command: kubeadm token create --print-join-command
+    register: join_command
 
 
-    - name: create .kube directory
-      become: yes
-      become_user: ubuntu
-      file:
-        path: $HOME/.kube
-        state: directory
-        mode: 0755
-    #- name: Wait init to complete and generate admin.conf
-    #  wait_for:
-    #    path: /etc/kubernetes/admin.conf
-
-    - name: copy admin.conf to user's kube config
-      copy:
-        src: /etc/kubernetes/admin.conf
-        dest: /home/ubuntu/.kube/config
-        remote_src: yes
-        owner: ubuntu
-
-    - name: install Pod network
-      become: yes
-      become_user: ubuntu
-      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml >> pod_network_setup.txt
-
-      args:
-        chdir: $HOME
-        creates: pod_network_setup.txt
-
-
-
-        #- name: kubernetes.yml --> Install Flannel
-        #shell: kubectl -n kube-system apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
-        #become: yes
-        #environment:
-        #KUBECONFIG: "/etc/kubernetes/admin.conf"
-        #when: inventory_hostname in (groups['masters'] | last)
