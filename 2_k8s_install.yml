@@ -62,10 +62,6 @@
         - swap
         - none
 
-    - name: Disable swap
-      command: swapoff -a
-      when: ansible_swaptotal_mb > 0
-
     - name: 'Reload configs and restart kubelet'
       become: yes
       systemd:
@@ -73,37 +69,6 @@
         daemon_reload: yes
         name: kubelet
 
-- hosts: workers
-  become: yes
-  tasks:
-    - name: docker daemon config json
-      shell: |
-        cat > /etc/docker/daemon.json <<EOF
-        {
-          "exec-opts": ["native.cgroupdriver=systemd"],
-          "log-driver": "json-file",
-          "log-opts": {
-            "max-size": "100m"
-          },
-          "storage-driver": "overlay2"
-        }
-        EOF
-
-
-- hosts: workers
-  become: yes
-  tasks:
-    - name: docker daemon dir
-      shell: mkdir -p /etc/systemd/system/docker.service.d
-
-- hosts: workers
-  become: yes
-  tasks:
-    - name: reload daemon
-      systemd:
-        state: restarted
-        daemon_reload: yes
-        name: docker
 
     #- hosts: workers
     #become: yes
