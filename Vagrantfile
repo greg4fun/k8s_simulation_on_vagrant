@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 # Vagrant multi-machine sample setup
-N=2
+N=3
 Vagrant.configure("2") do |config|
   config.vm.define :master do |master|
     master.vm.provision :shell, path: "provision.sh"
