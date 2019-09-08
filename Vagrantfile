@@ -23,12 +23,12 @@ Vagrant.configure("2") do |config|
 
   end
  (1..N).each do |i|
-    config.vm.define :worker1 do |worker1|
-      worker1.vm.provision :shell, path: "provision.sh"
-      worker1.vm.box = "ubuntu/bionic64"
-      worker1.vm.network :private_network, ip: "192.168.50.#{i+10}"
-      worker1.vm.hostname = "node-#{i}"
-      worker1.vm.provider :virtualbox do |vb|
+    config.vm.define "worker#{i}" do |worker|
+      worker.vm.provision :shell, path: "provision.sh"
+      worker.vm.box = "ubuntu/bionic64"
+      worker.vm.network :private_network, ip: "192.168.50.#{i+11}"
+      worker.vm.hostname = "worker#{i}"
+      worker.vm.provider :virtualbox do |vb|
           # Don't boot with headless mode
           #   vb.gui = true
           # Use VBoxManage to customize the VM. For example to change memory:
@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
   config.vm.define :player do |player|
     player.vm.provision :shell, path: "provision-player.sh"
     player.vm.box = "ubuntu/bionic64"
-    player.vm.network :private_network, ip: "192.168.50.14"
+    player.vm.network :private_network, ip: "192.168.50.11"
     player.vm.hostname = "player"
     player.vm.provider :virtualbox do |vb|
         # Don't boot with headless mode
