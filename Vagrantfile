@@ -39,11 +39,13 @@ Vagrant.configure("2") do |config|
             '--cpus', '1'
           ]
       end
-
     end
   end
   config.vm.define :player do |player|
     player.vm.provision :shell, path: "provision-player.sh"
+    player.vm.provision "ansible" do |ansible|
+        ansible.playbook = "1_k8s_install.yml"
+    end
     player.vm.box = "ubuntu/bionic64"
     player.vm.network :private_network, ip: "192.168.50.11"
     player.vm.hostname = "player"
